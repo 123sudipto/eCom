@@ -9,13 +9,14 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 
 const connectDB = require("./config/db");
-const globalErrorHandler = require("./middleware/auth");
+const globalErrorHandler = require("./middleware/globalErrorHandler");
 const AppError = require("./utils/appError");
+// const { promisify } = require("util");
 
-const authRoutes = require("./routes/authRoute");
-const productRoutes = require("./routes/productRoute");
-const orderRoutes = require("./routes/orderRoute");
-const adminRoutes = require("./routes/adminRoute");
+const authRoutes = require("./routes/authRoutes");
+const productRoutes = require("./routes/productRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 
 const app = express();
@@ -47,13 +48,15 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
-app.all("*", (req, res, next) => {
+app.all("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+module.exports = express.Router();
