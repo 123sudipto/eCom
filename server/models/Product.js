@@ -1,4 +1,28 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+
+const reviewSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  comment: {
+    type: String,
+    required: true
+  }
+}, {
+  timestamps: true
+});
 
 const productSchema = new mongoose.Schema({
   name: {
@@ -43,7 +67,8 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Color is required']
   },
-  averageRating: {
+  reviews: [reviewSchema],
+  rating: {
     type: Number,
     default: 0,
     min: [0, 'Rating cannot be negative'],
@@ -56,14 +81,28 @@ const productSchema = new mongoose.Schema({
   featured: {
     type: Boolean,
     default: false
-  }
+  },
+  totalStock: {
+    type: Number,
+    default: 0
+  },
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Add index for search functionality
-productSchema.index({ name: 'text', description: 'text', brand: 'text' });
+// Calculate total stock from sizes
+productSchema.pre('save', function(next) {
+  this.totalStock = this.sizes.reduce((total, size) => total + size.stock, 0);
+  next();
+});
+
+// Add indexes for search functionality
+productSchema.index({ name: 'text', description: 'text', brand: 'text', category: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ featured: 1 });
 
 const Product = mongoose.model('Product', productSchema);
 
-export default Product; 
+module.exports = Product; 

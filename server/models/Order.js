@@ -76,10 +76,17 @@ const orderSchema = new mongoose.Schema({
     }
   },
   shippedAt: Date,
-  deliveredAt: Date
-}, {
-  timestamps: true
-});
+  totalAmount: { type: Number, required: true },
+  isPaid: { type: Boolean, default: false },
+  deliveredAt: Date,
+  isDelivered: { type: Boolean, default: false },
+  paidAt: Date,
+//   timestamps: true,
+//     toJSON: { virtuals: true },
+//     toObject: { virtuals: true }
+}, { timestamps: true }
+);
+
 
 // Virtual for order total
 orderSchema.virtual('orderTotal').get(function() {

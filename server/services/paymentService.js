@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
+
 class PaymentService {
   /**
    * Initialize Razorpay instance
@@ -26,6 +27,7 @@ class PaymentService {
    * Get Razorpay instance (lazy initialization)
    * @private
    */
+  static _razorpay = null;
   static getRazorpayInstance() {
     if (!this._razorpay) {
       this._razorpay = this.initializeRazorpay();
@@ -76,7 +78,8 @@ class PaymentService {
         }
       }
       
-      console.error('Razorpay create order error:', error);
+      // console.error('Razorpay create order error:', error);
+      console.error('Razorpay order error:', error.message);
       throw error instanceof Error ? error : new Error('Failed to create payment order');
     }
   }
@@ -204,7 +207,8 @@ class PaymentService {
         currency: 'INR',
         name: options.name || 'Shoe Store',
         description: options.description || 'Payment for your order',
-        image: options.image || '/shoe.svg',
+        // image: options.image || '/shoe.svg',
+        image: options.image || process.env.SITE_LOGO || '/logo.png',
         theme: {
           color: '#4F46E5'
         }
@@ -225,7 +229,8 @@ class PaymentService {
       
       // Try to fetch a non-existent payment to verify credentials
       // This will fail with auth error if credentials are invalid
-      await razorpay.payments.fetch('dummy_id');
+      // await razorpay.payments.fetch('dummy_id');
+      await razorpay.orders.all({ count: 1 });
     } catch (error) {
       if (error.error && error.error.code === 'AUTHENTICATION_ERROR') {
         return false;

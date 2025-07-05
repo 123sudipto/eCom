@@ -1,71 +1,34 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const { promisify } = require('util');
 
-const protect = async (req, res, next) => {
-  try {
-    let token;
-
-    // Get token from Authorization header
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-    // Check for token in cookies as fallback
-    else if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-    }
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Please login to access this resource'
-      });
-    }
-
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get user from token
-      const user = await User.findById(decoded.id).select('-password');
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'User no longer exists'
-        });
-      }
-
-      // Check if user changed password after token was issued
-      if (user.passwordChangedAt && decoded.iat < user.passwordChangedAt.getTime() / 1000) {
-        return res.status(401).json({
-          success: false,
-          message: 'Password recently changed, please login again'
-        });
-      }
-
-      // Add user to request object
-      req.user = user;
-      next();
-    } catch (error) {
-      if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token'
-        });
-      }
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          success: false,
-          message: 'Token expired'
-        });
-      }
-      throw error;
-    }
-  } catch (error) {
-    next(error);
+exports.protect = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
   }
-};
 
-const admin = (req, res, next) => {
+  if (!token) {
+    return next(new AppError("You are not logged in", 401));
+  }
+  const decorded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const userId = decorded.id;
+
+  const currentUser = await User.findById(userId);
+
+  if (!currentUser) {
+    return next(new AppError("The user not found", 401));
+  }
+  req.user = currentUser;
+  next();
+});
+
+exports.admin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -83,4 +46,11 @@ const admin = (req, res, next) => {
   next();
 };
 
-module.exports = { protect, admin }; 
+exports.restrictTo = (...roles) => {
+  return (req, _res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('You do not have permission', 403));
+    }
+    next();
+  };
+};
