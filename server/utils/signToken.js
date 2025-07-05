@@ -27,3 +27,5 @@ const createSendToken = (user, statusCode, res) => {
     },
   });
 };
+
+module.exports = { signToken, createSendToken };

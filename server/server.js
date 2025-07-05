@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -11,7 +12,7 @@ const hpp = require("hpp");
 const connectDB = require("./config/db");
 const globalErrorHandler = require("./middleware/globalErrorHandler");
 const AppError = require("./utils/appError");
-// const { promisify } = require("util");
+const User = require("./models/User");
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -47,6 +48,24 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
+
+async function createAdminUser() {
+  const existingAdmin = await User.findOne({ email: process.env.ADMIN_EMAIL || 'admin@example.com' });
+  if (!existingAdmin) {
+    const adminUser = new User({
+      name: 'admin',
+      email: process.env.ADMIN_EMAIL || 'admin@example.com',
+      password: process.env.ADMIN_PASSWORD || 'admin123',
+      isAdmin: true
+    });
+    await adminUser.save();
+    console.log('Admin user created:', adminUser.email);
+  } else {
+    console.log('Admin user already exists:', existingAdmin.email);
+  }
+}
+
+createAdminUser().catch(console.error);
 
 app.all("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
