@@ -18,12 +18,12 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const {createAdminUser} = require("./models/adminUser");
 
 
 const app = express();
 
 connectDB();
-
 
 // Global Middlewares
 
@@ -44,28 +44,13 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+createAdminUser();
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
-async function createAdminUser() {
-  const existingAdmin = await User.findOne({ email: process.env.ADMIN_EMAIL || 'admin@example.com' });
-  if (!existingAdmin) {
-    const adminUser = new User({
-      name: 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@example.com',
-      password: process.env.ADMIN_PASSWORD || 'admin123',
-      isAdmin: true
-    });
-    await adminUser.save();
-    console.log('Admin user created:', adminUser.email);
-  } else {
-    console.log('Admin user already exists:', existingAdmin.email);
-  }
-}
-
-createAdminUser().catch(console.error);
 
 app.all("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
@@ -78,4 +63,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
-module.exports = express.Router();
+// module.exports = express.Router();

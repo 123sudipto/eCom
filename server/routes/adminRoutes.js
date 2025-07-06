@@ -3,6 +3,8 @@ const router = express.Router();
 const adminController = require("../controllers/adminController");
 const { protect, restrictTo } = require("../middleware/auth");
 
+router.post("/login", adminController.adminLogin);
+
 // Middleware: only authenticated and role = admin
 router.use(protect);
 router.use(restrictTo("admin"));

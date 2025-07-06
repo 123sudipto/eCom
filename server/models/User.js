@@ -19,7 +19,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: [8, "Password must be 8 character long"],
-    maxlength: [20, "Password must be within 20 characters"]
+    maxlength: [64, "Password must be within 20 characters"]
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
   },
 });
 
@@ -32,8 +37,8 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
-  return await bcrypt.compare(candidatePassword, userPassword);
+userSchema.methods.correctPassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 }
 
 const User = mongoose.model("User", userSchema);
