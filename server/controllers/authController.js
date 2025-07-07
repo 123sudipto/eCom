@@ -7,27 +7,18 @@ const {createSendToken} = require("../utils/signToken");
 
 exports.signUp = catchAsync(async (req, res, next) => {
   if (!req.body.name || !req.body.email || !req.body.password) {
-    // return res.status(400).json({
-    //   status: "error",
-    //   message: "Missing required fields",
-    // });
     return next(new AppError("Missing required fields", 400));
   }
   const user = await User.findOne({ email: req.body.email });
   if (user) {
-    // return res.status(400).json({
-    //   status: "error",
-    //   message: "User already exists",
-    // });
     return next(new AppError("User already exists", 409));
   }
 
-  const newUser = await User.create(req.body);
-
-  // res.status(201).json({
-  //   status: "Success",
-  //   data: newUser,
-  // });
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password
+  });
 
   createSendToken(newUser, 201, res);
 });
