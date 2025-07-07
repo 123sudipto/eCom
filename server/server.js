@@ -19,6 +19,7 @@ const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const {createAdminUser} = require("./models/adminUser");
+const cartRoutes = require("./routes/cartRoutes");
 
 
 const app = express();
@@ -50,6 +51,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/cart", cartRoutes);
 
 
 app.all("*", (req, _res, next) => {

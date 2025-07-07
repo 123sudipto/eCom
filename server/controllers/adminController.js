@@ -40,8 +40,6 @@ exports.getAllUsers = catchAsync(async (_req, res, _next) => {
     count: users.length,
     data: users,
   });
-  console.log("users",users);
-  console.log("res",res);
 });
 
 // @desc    Update user role
