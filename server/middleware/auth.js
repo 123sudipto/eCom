@@ -4,7 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { promisify } = require('util');
 
-exports.protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsync(async (req, _res, next) => {
   let token;
   if (
     req.headers.authorization &&

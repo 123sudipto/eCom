@@ -5,7 +5,7 @@ const orderController = require("../controllers/orderController");
 const { protect, restrictTo } = require("../middleware/auth");
 
 // Customer routes
-router.post("/", protect, orderController.createOrder);
+router.post("/order", protect, orderController.createOrder);
 router.get("/myOrders", protect, orderController.getMyOrders);
 router.patch("/:id/pay", protect, orderController.markAsPaid);
 

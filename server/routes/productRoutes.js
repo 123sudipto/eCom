@@ -7,11 +7,11 @@ const { protect, restrictTo } = require("../middleware/auth");
 router
   .route("/")
   .post(protect, restrictTo("admin"), productController.createProduct)
-  .get(protect, restrictTo("admin"), productController.getAllProducts);
+  .get(productController.getAllProducts);
 
 router
   .route("/:id")
-  .get(protect, restrictTo("admin"), productController.getProductById)
+  .get(protect, productController.getProductById)
   .patch(protect, restrictTo("admin"), productController.updateProduct)
   .delete(protect, restrictTo("admin"), productController.deleteProduct);
 

@@ -20,6 +20,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const {createAdminUser} = require("./models/adminUser");
 const cartRoutes = require("./routes/cartRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 
 const app = express();
@@ -34,7 +35,12 @@ app.use(cors());
 app.use(helmet());                                       // Set security HTTP headers
 app.use(xss());                                         // Prevent XSS attacks
 app.use(mongoSanitize());                              // Prevent NoSQL injection
-app.use(hpp());                                       // Prevent HTTP param pollution
+app.use(hpp());          
+
+// app.use(cors({
+//   origin: ["http://localhost:3000", "http://localhost:5173"],
+//   credentials: true,
+// }))
 
 // Rate limiter (prevent brute force attacks)
 
@@ -52,6 +58,7 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/cart", cartRoutes);
+app.use("/api/v1/payment", paymentRoutes);
 
 
 app.all("*", (req, _res, next) => {
